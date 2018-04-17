@@ -6,7 +6,7 @@
 
 Note: While this looks like a complete project because of its size, this project is still under development. 
 
-Asteroid is a statically typed, object-oriented programming language for smart contracts on the BenchChain MultiChain. Its syntax primarily derives from [Go](https://golang.org), [Java]() and [Python](), along with many of the blockchain-specific constructs drawn (at least in part) from [Solidity](https://github.com/ethereum/solidity) and [Viper](https://github.com/ethereum/viper).
+Asteroid is a statically typed, object-oriented programming language for smart contracts on the BenchChain MultiChain. Its syntax primarily derives from [Go](https://golang.org), [Java]() and [Python](), along with many of the blockchain-specific constructs drawn (at least in part) from [Solidity](https://github.com/ethereum/solidity) and [Viper](https://github.com/ethereum/viper). Asteroid works alongside BenchChains's integrate distributed virtual machine layer known as [BenchVM](https://github.com/benchlab/benchvm)
 
 Asteroid is agnostic to the distributed virtual machines it runs on. This means the same code can be used on other distributed virtual machine-based smart contract systems on other blockchains.
 
