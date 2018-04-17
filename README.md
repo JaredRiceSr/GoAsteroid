@@ -23,15 +23,15 @@ Asteroid is agnostic to the distributed virtual machines it runs on. This means 
 
 In no particular order, Asteroid strives to:
 
-- Deterministic execution
-- Balance legibility, security and the overall safety of using Asteroid in production.
-- Follow other OOP Languages with more features.
-- Easy to learn
-- Support for ByteCode generation
-- Coverage for all Smart Contract platforms
-- Built-in Smart Contract Generator for EOS, Ethereum and NEO
+- Deterministic execution (85% Done)
+- Balance legibility, security and the overall safety of using Asteroid in production. (35% Done)
+- Follow other OOP Languages with more features. (75% Done)
+- Easy to learn (90% Done)
+- Support for ByteCode generation (100% Done)
+- Coverage for all Smart Contract platforms (50% Done)
+- Built-in Smart Contract Generator for EOS, Ethereum and NEO (10% Done)
 - From the design and implementation factors of the Asteroid language to the
-website and documents for Astroid, we want it to be exceptional.
+website and documents for Astroid, we want it to be exceptional. (30% Done)
 
 ## Asteroid Smart Contract Example
 
