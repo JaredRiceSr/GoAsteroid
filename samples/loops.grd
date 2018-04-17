@@ -1,0 +1,35 @@
+package sample asteroid.0.0.1
+
+func main(){
+
+    // jumps of two
+    for i = 0; i < 50; i+=2 {
+
+    }
+
+    // simple condition
+    for i = 0; i < 50 {
+
+    }
+
+    // iterate through an array
+    x = []string{"Hello", "World"}
+    for _, a in x {
+
+    }
+
+    y = map[string]int{"Hi":5, "You":6}
+    for k, v in y {
+
+    }
+
+    z = []string{"Hello", "World"}
+    for i, a in z {
+
+    }
+
+    for true {
+
+    }
+
+}

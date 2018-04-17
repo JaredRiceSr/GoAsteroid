@@ -1,0 +1,57 @@
+package standard asteroid.0.0.1
+
+contract AccessRestriction {
+    // These will be assigned at the construction
+    // phase, where `msg.sender` is the account
+    // creating this contract.
+    var (
+        owner = msg.sender
+        creationTime = now()
+    )
+
+    // Modifiers can be used to change
+    // the body of a function.
+    // If this modifier is used, it will
+    // prepend a check that only passes
+    // if the function is called from
+    // a certain address.
+    func onlyBy(account address){
+        require(msg.sender == account)
+    }
+
+    /// Make `_newOwner` the new owner of this
+    /// contract.
+    func changeOwner(newOwner address){
+        owner = newOwner
+    }
+
+    func onlyAfter(time uint){
+        require(now >= time)
+    }
+
+    /// Erase ownership information.
+    /// May only be called 6 weeks after
+    /// the contract has been created.
+    func disown(){
+        onlyBy(owner)
+        onlyAfter(creationTime + 6 /* time.Week */)
+        delete(owner)
+    }
+
+    // This modifier requires a certain
+    // fee being associated with a function call.
+    // If the caller sent too much, he or she is
+    // refunded, but only after the function body.
+    // This was dangerous before Solidity version 0.4.0,
+    // where it was possible to skip the part after `_;`.
+    func costs(amount uint){
+        require(msg.value >= amount)
+    }
+
+    func forceOwnerChange(newOwner address){
+        onlyBy(this.owner)
+        costs(uint(200 * ether))
+        owner = newOwner
+    }
+
+}

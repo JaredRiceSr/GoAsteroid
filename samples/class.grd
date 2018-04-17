@@ -1,0 +1,42 @@
+package sample asteroid.0.0.1
+
+interface Noisy {
+    makeNoise() string
+}
+
+abstract class DEX is Exchange {
+
+    func executeSwap()() string {
+        return ""
+    }
+
+}
+
+// must implement the interface
+class OrderBook {
+
+    var name string
+
+    constructor(n string){
+        this.name = n
+    }
+
+    func makeNoise() string {
+        return "Woof!"
+    }
+
+}
+
+class Mode inherits Simple {
+
+    func makeNoise() string {
+        return "mode switched..."
+    }
+}
+
+func main(){
+    d = new AtomicSwap("Two")
+    io.Printf("%s: %s", d.initiateContract()(), d.makeNoise())
+    p = new Party()
+    io.Printf("%s: %s", p.executeSwap()(), p.makeNoise())
+}

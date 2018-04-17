@@ -1,0 +1,306 @@
+contract ProxyPayment {
+
+    var (
+        payout address
+        tokenSales address
+        owner address
+    )
+
+    constructor(po, ts address) {
+        this.payout = po
+        this.tokenSales = ts
+        this.owner = po
+    }
+
+    // add fallback func
+
+}
+contract TokenSales inherits TokenSalesBase is TokenSalesInterface {
+
+    func onlyOwner(){
+        require(msg.sender == this.owner)
+    }
+
+    func onlyOrigin(){
+        require(tx.origin == this.owner)
+    }
+
+    global var (
+        WEIPERETH uint256  = 1000000000000000000;
+        BILLION uint256 = 1000000000;
+        CENTS uint256 = 100;
+    )
+
+    var proxyPayouts map[address]address
+
+    constructor(cfg address) {
+        this.owner = msg.sender
+        this.config = cfg
+        saleStatus.founderClaim = false;
+        saleStatus.releasedTokens = 0;
+        saleStatus.releasedBadges = 0;
+        saleStatus.claimers = 0;
+        saleConfig.startDate = ConfigInterface(config).getConfigUint("sale1:period1");
+        saleConfig.periodTwo = ConfigInterface(config).getConfigUint("sale1:period2");
+        saleConfig.periodThree = ConfigInterface(config).getConfigUint("sale1:period3");
+        saleConfig.endDate = ConfigInterface(config).getConfigUint("sale1:end");
+        saleConfig.founderAmount = ConfigInterface(config).getConfigUint("sale1:famount") * BILLION;
+        saleConfig.founderWallet = ConfigInterface(config).getConfigAddress("sale1:fwallet");
+        saleConfig.goal = ConfigInterface(config).getConfigUint("sale1:goal") * CENTS;
+        saleConfig.cap = ConfigInterface(config).getConfigUint("sale1:cap") * CENTS;
+        saleConfig.badgeCost = ConfigInterface(config).getConfigUint("sale1:badgecost") * CENTS;
+        saleInfo.amount = ConfigInterface(config).getConfigUint("sale1:amount") * BILLION;
+        saleInfo.totalWei = 0;
+        saleInfo.totalCents = 0;
+        //saleInfo.realCents; ?
+        saleStatus.founderClaim = false;
+        locked = true;
+    }
+
+
+  fallback() {
+    if getPeriod() == 0 {
+        throw()
+    }
+    amount = msg.value;
+    var sender address
+    if proxies[msg.sender].isProxy {
+      sender = proxies[msg.sender].payout;
+    } else {
+      sender = msg.sender;
+    }
+    if !purchase(sender, amount) {
+        throw()
+    }
+  }
+
+  func proxyPurchase(user address) (success bool) {
+    return purchase(user, msg.value)
+  }
+
+  internal func purchase(user address, amount uint256) (success bool) {
+    cents = weiToCents(amount)
+    if (saleInfo.realCents + cents) > saleConfig.cap {
+        return false
+    }
+    // was wei
+    weis = amount
+    var modifier uint256
+    period = getPeriod()
+    if (period == 0) or (cents == 0) {
+      return false;
+    } else {
+        exclusive switch period {
+            case 3: modifier = 100
+            case 2: modifier = 115
+            case 1: modifier = 130
+        }
+      creditwei = amount;
+      creditcents = (weiToCents(creditwei) * modifier * 10000) / 1000000;
+      buyers[user].centsTotal += creditcents;
+      buyers[user].weiTotal += creditwei;
+      saleInfo.totalCents += creditcents;
+      saleInfo.realCents += cents;
+      saleInfo.totalWei += creditwei;
+      Purchase(ethToCents, modifier, creditcents);
+      return true;
+    }
+  }
+
+  global func ppb(a, c uint256) (b uint256) {
+    b = (BILLION * a + c / 2) / c;
+    return b
+  }
+
+  global func calcShare(contrib, total uint256) (share uint256 ) {
+    ppbil = ppb(contrib, total)
+    share = ((ppbil * saleInfo.amount) / BILLION)
+    return share
+  }
+
+  global func weiToCents(weiAmount uint256) (cv uint256) {
+    cv = ((weiAmount * 100000 / WEIPERETH) * ethToCents) / 100000
+    return cv
+  }
+
+  func setEthToCents(eth uint256) (success bool) {
+    onlyOwner()
+    ethToCents = eth
+    success = true
+    return success
+  }
+
+
+  global func getSaleStatus() (fclaim bool, reltokens, relbadgesuint256, claimers uint256) {
+    return saleStatus.founderClaim, saleStatus.releasedTokens, saleStatus.releasedBadges, saleStatus.claimers;
+  }
+
+  global func getSaleInfo() (weiamount, cents, realcents, amount uint256) {
+    return saleInfo.totalWei, saleInfo.totalCents, saleInfo.realCents, saleInfo.amount
+  }
+
+
+  global func getSaleConfig() (start, two, three, end, goal, cap, badgecost, famount uint256, fwallet address) {
+    return saleConfig.startDate, saleConfig.periodTwo,
+        saleConfig.periodThree, saleConfig.endDate,
+        saleConfig.goal, saleConfig.cap, saleConfig.badgeCost,
+        saleConfig.founderAmount, saleConfig.founderWallet
+  }
+
+  global func goalReached() (reached bool) {
+    reached = (saleInfo.totalCents >= saleConfig.goal)
+    return reached
+  }
+
+  func claim() (success bool) {
+    return claimFor(msg.sender)
+  }
+
+  func claimFor(user address) (success bool) {
+    if (now() < saleConfig.endDate) or (buyers[user].claimed == true) {
+      return true
+    }
+
+    if !goalReached() {
+      if !transfer(user, buyers[user].weiTotal) {
+          throw()
+      }
+      buyers[user].claimed = true
+      return true
+    }
+
+    if goalReached() {
+      tokenc = ConfigInterface(config).getConfigAddress("ledger")
+      tokens = calcShare(buyers[user].centsTotal, saleInfo.totalCents)
+      badges = buyers[user].centsTotal / saleConfig.badgeCost
+      if (TokenInterface(tokenc).mint(msg.sender, tokens)) and (TokenInterface(tokenc).mintBadge(user, badges)) {
+        saleStatus.releasedTokens += tokens
+        saleStatus.releasedBadges += badges
+        saleStatus.claimers += 1
+        buyers[user].claimed = true
+        Claim(user, lbadges)
+        return true
+      }
+      return true
+    }
+
+  }
+
+  func claimFounders() (success bool) {
+    if saleStatus.founderClaim == true {
+        return false
+    }
+    if now() < saleConfig.endDate {
+        return false
+    }
+    if !goalReached() {
+        return false
+    }
+    tokenc = ConfigInterface(config).getConfigAddress("ledger");
+    tokens = saleConfig.founderAmount;
+    badges = uint(4);
+    faddr = saleConfig.founderWallet;
+    if (TokenInterface(tokenc).mint(faddr, tokens)) and (TokenInterface(tokenc).mintBadge(faddr, badges)) {
+      saleStatus.founderClaim = true;
+      saleStatus.releasedTokens += tokens;
+      saleStatus.releasedBadges += badges;
+      saleStatus.claimers += 1;
+      Claim(faddr, lbadges);
+      return true;
+    }
+    return false
+  }
+
+  global func getPeriod() (saleperiod uint) {
+    if (now() > saleConfig.endDate) or (now() < saleConfig.startDate) {
+      saleperiod = 0;
+      return saleperiod;
+    }
+    if now() >= saleConfig.periodThree {
+      saleperiod = 3;
+      return saleperiod;
+    }
+    if now() >= saleConfig.periodTwo {
+      saleperiod = 2;
+      return saleperiod;
+    }
+    if now() < saleConfig.periodTwo {
+      saleperiod = 1;
+      return saleperiod;
+    }
+  }
+
+  global func userInfo(user address) (centstotal, weitotal, share, badges uint256, claimed bool) {
+    share = calcShare(buyers[user].centsTotal, saleInfo.totalCents);
+    badges = buyers[user].centsTotal / saleConfig.badgeCost;
+    return buyers[user].centsTotal, buyers[user].weiTotal, share, badges, buyers[user].claimed;
+  }
+
+  global func myInfo() (centstotal, weitotal, share, badges uint256, claimed bool) {
+    return userInfo(msg.sender)
+  }
+
+  global func totalWei() uint {
+    return saleInfo.totalWei
+  }
+
+  global func totalCents() uint {
+    return saleInfo.totalCents;
+  }
+
+  global func startDate() uint {
+    return saleConfig.startDate;
+  }
+
+  global func periodTwo() uint {
+    return saleConfig.periodTwo;
+  }
+
+  global func periodThree() uint {
+    return saleConfig.periodThree;
+  }
+
+  global func endDate() (date uint) {
+    return saleConfig.endDate;
+  }
+
+  global func isEnded() bool {
+    return (now >= endDate());
+  }
+
+  global func sendFunds() (success bool) {
+    if locked {
+        return false
+    }
+    if !goalReached() { return false  }
+    if !isEnded() { return false  }
+    dao = ConfigInterface(config).getConfigAddress("sale1:dao")
+    if dao == 0x0000000000000000000000000000000000000000 { return false }
+    return transfer(dao, totalWei());
+  }
+
+  func regProxy(payout address)  (success bool) {
+    onlyOrigin()
+    proxy = new ProxyPayment(payout, this.address);
+    proxies[proxy].payout = payout;
+    proxies[proxy].isProxy = true;
+    proxyPayouts[payout] = proxy;
+    return true;
+  }
+
+  global func getProxy(payout address) (proxy address) {
+      return proxies[payout].address
+  }
+
+  global func getPayout(proxy address) (payout address, isProxy bool){
+      p = proxies[proxy]
+      return p.payout, p.isProxy
+  }
+
+  func unlock() (success bool) {
+      onlyOwner()
+      locked = false
+      return true
+  }
+
+}

@@ -1,0 +1,43 @@
+package sample asteroid.0.0.1
+
+func main(){
+
+    string_switch("house")
+
+    empty_switch(10)
+
+    exclusive_switch(6)
+
+}
+
+func string_switch(x string){
+    switch x {
+    case "house":
+        break
+    case "rat":
+        break
+    case "me":
+        break
+    }
+}
+
+func empty_switch(x int){
+    switch {
+    case x > 5:
+        break
+    case x < 5:
+        break
+    }
+}
+
+func exclusive_switch(x int){
+    exclusive switch {
+    case x > 5:
+        x++
+    case x < 5:
+        x--
+    case x == 5:
+        x = 4
+    }
+    // only one case statement will be executed
+}

@@ -1,0 +1,31 @@
+package examples asteroid.0.0.1
+
+contract Greeter {
+
+    var creator address
+    var greeting string
+
+    constructor(g string){
+        this.creator = msg.sender
+        this.greeting = g
+    }
+
+    func greet() string {
+        return greeting
+    }
+
+    func getBlockNumber() uint {
+        return block.number
+    }
+
+    func setGreeting(newGreeting string){
+        greeting = newGreeting
+    }
+
+     func kill(){
+         if msg.sender == creator {
+             selfDestruct(creator)
+         }
+     }
+
+}

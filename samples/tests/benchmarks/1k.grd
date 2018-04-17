@@ -1,0 +1,12 @@
+package benchmarks asteroid 0.0.1
+
+contract OneKVarDecls {
+
+    var (
+        name string
+        name2 string
+        name3 string
+        name4 string
+        name5 string
+    )
+}

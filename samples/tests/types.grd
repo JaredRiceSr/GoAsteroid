@@ -1,0 +1,11 @@
+contract T {
+
+    var a string
+    var b, c string
+    var d map[string]string
+    var e []string
+    var f func()()
+    var g func(map[string]string, string) ([]string, int)
+    var h func(string)
+
+}

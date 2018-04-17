@@ -1,0 +1,312 @@
+package digixdao asteroid.0.0.1
+
+/// @title DigixDAO Contract Interfaces
+
+contract ConfigBase {
+
+    global var owner address
+
+    var (
+        admins map[address]bool
+        addressMap map[bytes32]address
+        boolMap map[bytes32]bool
+        bytesMap map[bytes32]bytes32
+        uintMap map[bytes32]uint256
+    )
+}
+
+interface ConfigInterface {
+
+  /// @notice setConfigAddress sets configuration `key` to `val`
+  /// @param key The key name of the configuration.
+  /// @param val The value of the configuration.
+  /// @return Whether the configuration setting was successful or not.
+  setConfigAddress(key bytes32, val address) (success bool);
+
+  /// @notice setConfigBool sets configuration `key` to `val`
+  /// @param key The key name of the configuration.
+  /// @param val The value of the configuration.
+  /// @return Whether the configuration setting was successful or not.
+  setConfigBool(key bytes32, val bool) (success bool);
+
+  /// @notice setConfigBytes sets configuration `key` to `val`
+  /// @param key The key name of the configuration.
+  /// @param val The value of the configuration.
+  /// @return Whether the configuration setting was successful or not.
+  setConfigBytes(key bytes32,  val bytes32) (success bool);
+
+  /// @notice setConfigUint `key` to `val`
+  /// @param key The key name of the configuration.
+  /// @param val The value of the configuration.
+  /// @return Whether the configuration setting was successful or not.
+  setConfigUint(key bytes32, val uint256) (success bool);
+
+  /// @notice getConfigAddress gets configuration `key`'s value
+  /// @param key The key name of the configuration.
+  /// @return The configuration value
+  getConfigAddress(key bytes32) (val address);
+
+  /// @notice getConfigBool gets configuration `key`'s value
+  /// @param key The key name of the configuration.
+  /// @return The configuration value
+  getConfigBool(key bytes32) (val bool);
+
+  /// @notice getConfigBytes gets configuration `key`'s value
+  /// @param key The key name of the configuration.
+  /// @return The configuration value
+  getConfigBytes(key bytes32) (val bytes32);
+
+  /// @notice getConfigUint gets configuration `key`'s value
+  /// @param key The key name of the configuration.
+  /// @return The configuration value
+  getConfigUint(key bytes32) (val uint256);
+
+  /// @notice addAdmin sets `admin` as configuration admin
+  /// @return Whether the configuration setting was successful or not.
+  addAdmin(admin address) (success bool);
+
+  /// @notice removeAdmin removes  `admin`'s rights
+  /// @param admin The key name of the configuration.
+  /// @return Whether the configuration setting was successful or not.
+  removeAdmin(admin address) (success bool);
+
+}
+
+contract TokenBase {
+
+    var (
+        balances map[address]uint256
+        allowed map[address]map[address]uint256
+        seller map[address]bool
+    )
+
+    var config address
+    var dao address
+    var owner address
+    global var badgeLedger address
+    var locked bool
+
+    /// @return total amount of tokens
+    global var totalSupply uint256
+
+    indexed event Transfer(from, to address, value uint256);
+    indexed event Mint(recipient address, amount uint256);
+    indexed event Approval(owner, spender address, value uint256);
+}
+
+interface TokenInterface {
+
+  /// @param owner The address from which the balance will be retrieved
+  /// @return The balance
+  getBalance(owner address) (balance uint256);
+
+  /// @notice send `value` tokens to `to` from `msg.sender`
+  /// @param to The address of the recipient
+  /// @param value The amount of tokens to be transfered
+  /// @return Whether the transfer was successful or not
+  transfer(to address,  value uint256) (success bool);
+
+  /// @notice send `value` tokens to `to` from `from` on the condition it is approved by `from`
+  /// @param from The address of the sender
+  /// @param to The address of the recipient
+  /// @param value The amount of tokens to be transfered
+  /// @return Whether the transfer was successful or not
+  transferFrom(from, to address, value uint256) (success bool);
+
+  /// @notice `msg.sender` approves `spender` to spend `value` tokens on its behalf
+  /// @param spender The address of the account able to transfer the tokens
+  /// @param value The amount of tokens to be approved for transfer
+  /// @return Whether the approval was successful or not
+  approve(spender address, value uint256) (success bool);
+
+  /// @param owner The address of the account owning tokens
+  /// @param spender The address of the account able to transfer the tokens
+  /// @return Amount of remaining tokens of owner that spender is allowed to spend
+  allowance(owner address, spender address) (remaining uint256);
+
+  /// @notice mint `amount` of tokens to `owner`
+  /// @param owner The address of the account receiving the tokens
+  /// @param amount The amount of tokens to mint
+  /// @return Whether or not minting was successful
+  mint(owner address, amount uint256) (success bool);
+
+  /// @notice mintBadge Mint `amount` badges to `owner`
+  /// @param owner The address of the account receiving the tokens
+  /// @param amount The amount of tokens to mint
+  /// @return Whether or not minting was successful
+  mintBadge(owner address, amount uint256) (success bool);
+
+  registerDao(dao address) (success bool);
+  registerSeller(tokensales address) (success bool);
+
+}
+
+contract TokenSalesBase {
+
+    class SaleProxy {
+        var payout address
+        var isProxy bool
+    }
+
+    class SaleStatus {
+        var founderClaim bool
+        var releasedTokens uint
+        var releasedBadges uint
+        var claimers uint
+    }
+
+    class Info {
+        var totalWei uint
+        var totalCents uint
+        var realCents uint
+        var amount uint
+    }
+
+    class SaleConfig {
+        var startDate uint
+        var periodTwo uint
+        var periodThree uint
+        var endDate uint
+        var goal uint
+        var cap uint
+        var badgeCost uint
+        var founderAmount uint
+        var founderWallet address
+    }
+
+    class Buyer {
+        var centsTotal uint
+        var weiTotal uint
+        var claimed bool
+    }
+
+    var saleInfo Info
+    var saleConfig SaleConfig
+    var saleStatus SaleStatus
+
+    var config address
+    var owner address
+    var locked bool
+
+    global var ethToCents uint
+
+    var buyers map[address]Buyer
+    var proxies map[address]SaleProxy
+
+    indexed event Purchase(exchange uint256, rate uint256, cents uint256)
+    indexed event Claim(user address, amount uint256, badges uint256)
+
+}
+
+interface TokenSalesInterface {
+
+  /// @notice Calculates the parts per billion 1⁄1,000,000,000 of `a` to `b`
+  /// @param a The antecedent
+  /// @param c The consequent
+  /// @return Part per billion value
+  global ppb(a, c uint) (b uint)
+
+  /// @notice Calculates the share from `total` based on `contrib`
+  /// @param contrib The contributed amount in USD
+  /// @param total The total amount raised in USD
+  /// @return Total number of shares
+  global calcShare(contrib, total uint256) (share uint256);
+
+  /// @notice Calculates the current USD cents value of `wei`
+  /// @param wei the amount of wei
+  /// @return The USD cents value
+  global weiToCents(wei uint256) (centsvalue uint256 );
+
+  proxyPurchase(user address) (success bool);
+
+  /// @notice Send msg.value purchase for user.
+  /// @param user The account to be credited
+  /// @return Success if purchase was accepted
+  internal purchase(user address, amount uint256) (success bool);
+
+  /// @notice Get crowdsale information for `user`
+  /// @param user The account to be queried
+  /// @return `centstotal` the total amount of USD cents contributed
+  /// @return `weitotal` the total amount in wei contributed
+  /// @return `share` the current token shares earned
+  /// @return `badges` the number of proposer badges earned
+  /// @return `claimed` is true if the tokens and badges have been claimed
+  global userInfo(user address) (centstotal, weitotal, share, badges uint256, claimed bool);
+
+  /// @notice Get the crowdsale information from msg.sender (see userInfo)
+  global myInfo() (centstotal, weitotal, share, badges uint256, claimed bool);
+
+  /// @notice get the total amount of wei raised for the crowdsale
+  /// @return The amount of wei raised
+  global totalWei() uint;
+
+  /// @notice get the total USD value in cents raised for the crowdsale
+  /// @return the amount USD cents
+  global totalCents() uint;
+
+  /// @notice get the current crowdsale information
+  /// @return `startsale` The unix timestamp for the start of the crowdsale and the first period modifier
+  /// @return `two` The unix timestamp for the start of the second period modifier
+  /// @return `three` The unix timestamp for the start of the third period modifier
+  /// @return `endsale` The unix timestamp of the end of crowdsale
+  /// @return `totalwei` The total amount of wei raised
+  /// @return `totalcents` The total number of USD cents raised
+  /// @return `amount` The amount of DGD tokens available for the crowdsale
+  /// @return `goal` The USD value goal for the crowdsale
+  /// @return `famount` Founders endowment
+  /// @return `faddress` Founder wallet address
+  /*getSaleInfo() (uint256 startsale, uint256 two, uint256 three, uint256 endsale, uint256 totalwei, uint256 totalcents, amount uint256, uint256 goal, uint256 famount, address faddress);*/
+
+  claimFor(user address) (success bool);
+
+  /// @notice Allows msg.sender to claim the DGD tokens and badges if the goal is reached or refunds the ETH contributed if goal is not reached at the end of the crowdsale
+  claim() (success bool);
+
+  claimFounders() (success bool);
+
+  /// @notice See if the crowdsale goal has been reached
+  global goalReached() (reached bool);
+
+  /// @notice Get the current sale period
+  /// @return `saleperiod` 0 = Outside of the crowdsale period, 1 = First reward period, 2 = Second reward period, 3 = Final crowdsale period.
+  global getPeriod() (saleperiod uint);
+
+  /// @notice Get the date for the start of the crowdsale
+  /// @return `date` The unix timestamp for the start
+  global startDate() (date uint);
+
+  /// @notice Get the date for the second reward period of the crowdsale
+  /// @return `date` The unix timestamp for the second period
+  global periodTwo() (date uint);
+
+  /// @notice Get the date for the final period of the crowdsale
+  /// @return `date` The unix timestamp for the final period
+  global periodThree() (date uint);
+
+  /// @notice Get the date for the end of the crowdsale
+  /// @return `date` The unix timestamp for the end of the crowdsale
+  global endDate() (date uint);
+
+  /// @notice Check if crowdsale has ended
+  /// @return `ended` If the crowdsale has ended
+  global isEnded() (ended bool);
+
+  /// @notice Send raised funds from the crowdsale to the DAO
+  /// @return `success` if the send succeeded
+  global sendFunds() (success bool);
+
+  //regProxy(address payment, address payout) (success bool);
+  regProxy(payout address) (success bool);
+
+  global getProxy(payout address) (proxy address);
+
+  global getPayout(proxy address) (payout address, isProxy bool);
+
+  global unlock() (success bool);
+
+  global getSaleStatus() (fclaim bool, reltokens, relbadges, claimers uint256)
+
+  global getSaleInfo() (weiamount, cents, realCents, amount uint256)
+
+  global getSaleConfig() (start, two, three, end, goal, cap, badgeCost, fAmount, fWallet uint256)
+}

@@ -1,0 +1,24 @@
+package coconuts asteroid 0.0.1
+
+interface ERC20Token {
+
+}
+
+contract TokenHasNoHome {
+
+    enum Stages {
+        Pre-sale, ICO, Finalized, Launched
+    }
+
+    constructor(owner address){
+
+    }
+
+    func requireOwner(){
+        require(msg.sender == owner)
+    }
+
+    func haltAuction(){
+        requireOwner()
+    }
+}

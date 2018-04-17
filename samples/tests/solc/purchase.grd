@@ -1,0 +1,49 @@
+package solc asteroid.0.0.1
+
+contract Purchase {
+
+    enum State { Created, Locked, Inactive }
+
+    external var (
+        value uint
+        seller address
+        buyer address
+        state State
+    )
+
+    constructor(){
+        seller = msg.sender
+        value = msg.value / 2
+        assert((2 * value) == msg.value)
+    }
+
+    event Aborted()
+    event PurchaseConfirmed()
+    event ItemReceived()
+
+    external func abort(){
+        assert(msg.sender == seller)
+        assert(state == State.Created)
+        Aborted()
+        state = State.Inactive
+        transfer(seller, this.balance)
+    }
+
+    external func confirmPurchase(){
+        assert(state == State.Created)
+        assert(msg.value == (2 * value))
+
+        PurchaseConfirmed()
+        buyer = msg.sender
+        state = State.Locked
+    }
+
+    external func confirmReceived() {
+        assert(msg.sender == buyer)
+        assert(state == State.Locked)
+        ItemReceived()
+        state = State.Inactive
+        transfer(buyer, value)
+        transfer(seller, this.balance)
+    }
+}

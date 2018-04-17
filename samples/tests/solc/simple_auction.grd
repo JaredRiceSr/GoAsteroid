@@ -1,0 +1,61 @@
+package solc asteroid.0.0.1
+
+contract SimpleAuction {
+
+    external var (
+        beneficiary address
+        auctionEnd uint
+        highestBidder address
+        highestBid uint
+    )
+
+    var pendingReturns map[address]uint
+
+    var ended bool
+
+    event HighestBidIncreased(bidder address, amount uint)
+    event AuctionEnded(winner address, amount uint)
+
+    constructor(biddingTime uint, ben address) {
+        this.beneficiary = ben
+        this.auctionEnd = now()
+    }
+
+    external (
+
+        func bid() {
+            assert(now() <= auctionEnd)
+            assert(msg.value > highestBid)
+            if highestBidder != 0 {
+                pendingReturns[highestBidder] += highestBid
+            }
+            highestBidder = msg.sender
+            highestBid = msg.value
+            HighestBidIncreased(msg.sender, msg.value)
+        }
+
+        func withdraw() bool {
+            amount = pendingReturns[msg.sender]
+            if amount > 0 {
+                pendingReturns[msg.sender] = 0
+                if !transfer(msg.sender, amount) {
+                    pendingReturns[msg.sender] = amount
+                    return false
+                }
+            }
+            return true
+        }
+
+        func endAuction(){
+            assert(now() >= auctionEnd)
+            assert(!ended)
+
+            ended = true
+            AuctionEnded(highestBidder, highestBid)
+
+            transfer(beneficiary, highestBid)
+        }
+
+    )
+
+}

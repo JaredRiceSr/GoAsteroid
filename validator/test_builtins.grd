@@ -1,0 +1,81 @@
+type uint uint256
+type int int256
+type byte int8
+type string []byte
+type address [20]byte
+type bytes32 [32]byte
+
+const (
+	burn = address(0)
+
+	wei = 1
+	kwei = 1000 * wei
+	babbage = kwei
+	mwei = 1000 * kwei
+	lovelace = mwei
+	gwei = 1000 * mwei
+	shannon = gwei
+	microether = 1000 * gwei
+	szabo = microether
+	milliether = 1000 * microether
+	finney = milliether
+	ether = 1000 * milliether
+)
+
+@Builtin("now") func now() uint
+@Builtin("length") func <T> len(array []T) int
+@Builtin("append") func <T> append(array []T, item T) []T
+@Builtin("delete") func <T> delete(machineStorageItem T)
+
+// account functions
+@Builtin("balanceOf") func balanceOf(a address) uint256
+@Builtin("transfer") func transfer(a address, amount uint256) bool
+@Builtin("call") func call(a address, gas uint, value uint, signature string) bool
+@Builtin("delegateCall") func delegateCall(a address)
+
+// cryptographic functions
+@Builtin("addmod") func addmod(x, y, k uint) uint
+@Builtin("mulmod") func mulmod(x, y, k uint) uint
+@Builtin("keccak256") func keccak256(a string) string
+@Builtin("sha256") func sha256(text string) string
+@Builtin("sha3") func sha3(text string) string
+@Builtin("ripemd160") func ripemd160()
+@Builtin("ecrecover") func ecrecover(v uint8, h, r, s []byte) address
+
+@Builtin("require") func require(that bool)
+@Builtin("assert") func assert(that bool)
+
+@Builtin("revert") func revert()
+@Builtin("throw") func throw()
+
+// contract functions
+// NO THIS KEYWORD: confusing for most programmers, unintentional bugs etc
+
+@Builtin("selfDestruct") func selfDestruct(recipient address) uint256
+
+class BuiltinMessage {
+	@Builtin("calldata") var data []byte
+	@Builtin("gas") var gas uint
+	@Builtin("caller") var sender address
+	@Builtin("signature") var sig [4]byte
+	@Builtin("value") var value uint
+}
+
+var msg BuiltinMessage
+
+class BuiltinBlock {
+	@Builtin("timestamp") var timestamp uint
+	@Builtin("number") var number uint
+	@Builtin("coinbase") var coinbase address
+	@Builtin("gasLimit") var gasLimit uint
+	@Builtin("blockhash") func blockhash(blockNumber uint) [32]byte
+}
+
+var block BuiltinBlock
+
+class BuiltinTransaction {
+	@Builtin("gasPrice") var gasPrice uint
+	@Builtin("origin") var origin address
+}
+
+var tx BuiltinTransaction

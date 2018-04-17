@@ -1,0 +1,24 @@
+contract ClassContract {
+
+    class OrderBook {
+
+    }
+
+    class Poodle inherits OrderBook {
+
+    }
+
+    class Spaniel inherits OrderBook {
+
+    }
+
+    abstract class Purebreed inherits OrderBook {
+
+    }
+
+    class Spoodle inherits Poodle, Spaniel {
+
+    }
+
+
+}

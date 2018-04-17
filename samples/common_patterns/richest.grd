@@ -1,0 +1,29 @@
+package standard asteroid.0.0.1
+
+contract WithdrawalContract {
+
+    var pendingWithdrawals map[address]uint
+    var richest address
+    var maxSent uint
+
+    constructor(){
+        this.richest = msg.sender
+        this.maxSent = msg.value
+    }
+
+    func becomeRichest() bool {
+        if msg.value > maxSent {
+            pendingWithdrawals[richest] += msg.value
+            richest = msg.sender
+            maxSent = msg.value
+            return true
+        }
+        return false
+    }
+
+    func withdraw() {
+        amount = pendingWithdrawals[msg.sender]
+        pendingWithdrawals[msg.sender] = uint256(0)
+        transfer(msg.sender, amount)
+    }
+}

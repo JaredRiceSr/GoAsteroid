@@ -1,0 +1,31 @@
+package examples asteroid.0.0.1
+
+contract CreatorBalanceChecker {
+
+    var creator address
+    var creatorBalance uint
+
+    constructor(){
+        creator = msg.sender
+        creatorbalance = balanceOf(creator)
+    }
+
+    func getContractAddress() address {
+        return address{}
+    }
+
+    func getCreatorBalance() uint {
+        return creatorBalance
+    }
+
+    func getCreatorCurrentBalance() uint {
+        return balanceOf(creator)
+    }
+
+    func kill(){
+        if msg.sender == creator {
+            selfDestruct(creator)
+        }
+    }
+
+}

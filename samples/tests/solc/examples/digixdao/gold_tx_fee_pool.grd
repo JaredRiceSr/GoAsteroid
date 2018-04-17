@@ -1,0 +1,93 @@
+package digixdao asteroid.0.0.1
+
+contract Collector {
+
+    public var (
+        owner address
+        dgdTokens address
+        txFeePool address
+        payoutPeriod uint
+    )
+
+    func isTxFeePool() {
+        require(msg.sender == txFeePool)
+    }
+
+    constructor(ownr, dgdtokens address, period uint){
+        owner = ownr
+        dgdTokens = dgdtokens
+        txFeePool = msg.sender
+        payoutPeriod = period
+    }
+
+    func collect() bool {
+        isTxFeePool()
+        return true
+    }
+
+    func withdraw() bool {
+        isTxFeePool()
+        return true
+    }
+
+}
+
+contract GoldTxFeePool {
+
+    class Period {
+        var collectionStart uint
+        var collectionEnd uint
+        var collectors map[address]address
+    }
+
+    public var (
+        dgxTokens address
+        dgdTokens address
+        environment []byte
+        collectionDuration uint
+        periodLength uint
+        periodCount uint
+        periods map[uint]Period
+    )
+
+    func afterRecent(){
+        require(now >= periods[periodCount].collectionEnd)
+    }
+
+    constructor(dgxtokens, dgdtokens address, env bytes32){
+        this.dgxTokens = dgxtokens
+        this.dgdTokens = dgdtokens
+        this.environment = env
+        this.periodCount = 1
+        exclusive switch env {
+            case "testnet":
+                collectionDuration = 5
+                periodLength = 10
+            case "morden":
+                collectionDuration = 10 //minutes;
+                periodLength = 30 //minutes;
+            case "mainnet":
+                collectionDuration = 7 //days;
+                periodLength = 90 // days;
+        }
+
+        periods[periodCount].collectionStart = now + periodLength
+        periods[periodCount].collectionEnd = periods[periodCount].collectionStart + collectionDuration
+    }
+
+    func newPeriod() bool {
+        afterRecent()
+        o = periods[periodCount]
+        periodCount++
+        n = periods[periodCount]
+        n.collectionStart = o.collectionStart + periodLength
+        n.collectionEnd = o.collectionEnd + periodLength
+        return true
+
+    }
+
+    func getPeriodInfo() (Begin, Final uint){
+        current = periods[periodCount]
+        return Begin, Final
+    }
+}

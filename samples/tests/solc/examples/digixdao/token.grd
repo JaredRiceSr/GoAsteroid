@@ -1,0 +1,240 @@
+
+package digixdao asteroid.0.0.1
+
+contract Badge  {
+
+    var (
+        balances map[address]uint
+        allowed map[address]map[address]uint256
+    )
+
+    public var (
+        owner address
+        locked bool
+        /// @return total amount of tokens
+        totalSupply uint
+    )
+
+    func onlyOwner() {
+        require(msg.sender == owner)
+    }
+
+    event Transfer(indexed from address, indexed to address, value uint)
+    indexed event Mint(recipient address, amount uint)
+    event Approval(indexed owner address, indexed spender address, value uint)
+
+    constructor(){
+        owner = msg.sender;
+    }
+
+    func safeToAdd(a, b uint) bool {
+        return (a + b >= a)
+    }
+
+    func addSafely(a, b uint) uint {
+        require(safeToAdd(a, b))
+        return a + b
+    }
+
+    func safeToSubtract(a, b uint) bool {
+        return (b <= a)
+    }
+
+    func subtractSafely(a, b uint) uint {
+        require(safeToSubtract(a, b))
+        return a - b
+    }
+
+    func getBalance(o address) (bal uint) {
+        return balances[o]
+    }
+
+    func transferTo(to address, value uint) (success bool) {
+        if balances[msg.sender] >= value and value > 0 {
+            balances[msg.sender] = subtractSafely(balances[msg.sender], value)
+            balances[to] = addSafely(value, balances[to])
+            Transfer(msg.sender, to, value)
+            success = true
+        } else {
+            success = false
+        }
+        return success
+    }
+
+    func transferFrom(from address, to address, value uint) (success bool) {
+        if balances[from] >= value and allowed[from][msg.sender] >= value and value > 0 {
+            balances[to] = addSafely(balances[to], value)
+            balances[from] = subtractSafely(balances[from], value);
+            allowed[from][msg.sender] = subtractSafely(allowed[from][msg.sender], value);
+            Transfer(from, to, value);
+            return true;
+        }
+        return false
+    }
+
+    func approve(spender address, value uint) (success bool){
+        allowed[msg.sender][spender] = value;
+        Approval(msg.sender, spender, value);
+        success = true
+        return success
+    }
+
+    func allowance(own address, spender address) (remaining uint) {
+        remaining = allowed[own][spender];
+        return remaining
+    }
+
+    func mint(own address, amount uint) (success bool) {
+        totalSupply = addSafely(totalSupply, amount);
+        balances[own] = addSafely(balances[own], amount);
+        Mint(own, amount)
+        return true
+    }
+
+    func setOwner(o address) (success bool){
+        onlyOwner()
+        this.owner = o
+        return true
+    }
+
+}
+
+contract Token inherits TokenBase {
+
+    func onlySales(){
+        require(seller[msg.sender])
+    }
+
+    func onlyOwner(){
+        require(msg.sender == this.owner)
+    }
+
+    func onlyDao(){
+        require(msg.sender == this.dao)
+    }
+
+    // TODO: where'd this come from, just added in later
+    var initSeller address
+
+    constructor(cfg address){
+        this.config = cfg
+        this.owner = msg.sender
+        this.initSeller = ConfigInterface(config).getConfigAddress("sale1:address")
+        seller[initSeller] = true
+        this.badgeLedger = new Badge()
+        this.locked = false
+    }
+
+    func safeToAdd(a, b uint) bool {
+        return (a + b >= a)
+    }
+
+    func addSafely(a, b uint) uint {
+        require(safeToAdd(a, b))
+        return a + b
+    }
+
+    func safeToSubtract(a, b uint) bool {
+        return (b <= a)
+    }
+
+    func subtractSafely(a, b uint) uint {
+        require(safeToSubtract(a, b))
+        return a - b
+    }
+
+    func getBalance(o address) (bal uint256) {
+        return balances[o]
+    }
+
+    func transferTo(to address, value uint) (success bool) {
+        if balances[msg.sender] >= value and value > 0 {
+            balances[msg.sender] = subtractSafely(balances[msg.sender], value)
+            balances[to] = addSafely(value, balances[to])
+            Transfer(msg.sender, to, value)
+            success = true
+        } else {
+            success = false
+        }
+        return success
+    }
+
+    func transferFrom(from address, to address, value uint) (success bool) {
+        if balances[from] >= value and allowed[from][msg.sender] >= value and value > 0 {
+            balances[to] = addSafely(balances[to], value)
+            balances[from] = subtractSafely(balances[from], value);
+            allowed[from][msg.sender] = subtractSafely(allowed[from][msg.sender], value);
+            Transfer(from, to, value);
+            return true;
+        }
+        return false
+    }
+
+    func approve(spender address, value uint) (success bool){
+        allowed[msg.sender][spender] = value;
+        Approval(msg.sender, spender, value);
+        success = true
+        return success
+    }
+
+    func allowance(own address, spender address) (remaining uint) {
+        remaining = allowed[own][spender];
+        return remaining
+    }
+
+    func mint(own address, amount uint) (success bool) {
+        totalSupply = addSafely(totalSupply, amount);
+        balances[own] = addSafely(balances[own], amount);
+        Mint(own, amount)
+        return true
+    }
+
+    func mintBadge(o address, amount uint256) (success bool) {
+        onlySales()
+        if !Badge(badgeLedger).mint(o, amount) {
+            return false
+        }
+        return true
+    }
+
+    func registerDao(newDao address) (success bool) {
+        onlyOwner()
+        if locked {
+            return false
+        }
+        this.dao = newDao
+        locked = true
+        return true
+    }
+
+    func setDao(newDao address) (success bool) {
+        onlyDao()
+        this.dao = newDao
+        return true
+    }
+
+    func isSeller(query address) (isSeller bool) {
+        return seller[query]
+    }
+
+    func registerSeller(tokenSales address) (success bool) {
+        onlyDao()
+        seller[tokenSales] = true
+        return true
+    }
+
+    func registerSeller(tokenSales address) (success bool) {
+        onlyDao()
+        seller[tokenSales] = false
+        return true
+    }
+
+    func setOwner(newOwner address) (success bool) {
+        if Badge(this.badgeLedger).setOwner(newOwner) {
+            this.owner = newOwner
+            return true
+        }
+        return false
+    }
+
+}

@@ -1,0 +1,64 @@
+package standard asteroid.0.0.1
+
+contract StateMachine {
+
+    enum Stage {
+        AcceptingBlindedBids,
+        RevealBids,
+        AnotherStage,
+        AreWeDoneYet,
+        Finished,
+    }
+
+    var (
+        // This is the current stage.
+        stage = Stage.AcceptingBlindedBids
+        creationTime = now()
+    )
+
+    func requireStage(s Stage) {
+        require(stage == s);
+    }
+
+
+    func timedTransitions() {
+        exclusive switch stage {
+            case Stage.AcceptingBlindedBids:
+                if now() >= creationTime + 10 /** time.Day*/ {
+                    stage = Stage.RevealBids
+                }
+            case Stage.RevealBids:
+                if now() >= creationTime + 12 /* time.Day*/ {
+                    stage = Stage.AnotherStage
+                }
+        }
+    }
+
+    func bid(){
+        timedTransitions()
+        requireStage(Stage.AcceptingBlindedBids)
+    }
+
+    func reveal(){
+        timedTransitions()
+        requireStage(Stage.RevealBids)
+    }
+
+    func g(){
+        timedTransitions()
+        requireStage(Stage.AnotherStage)
+        stage = Stage.AreWeDoneYet
+    }
+
+    func h(){
+        timedTransitions()
+        requireStage(Stage.AreWeDoneYet)
+        stage = Stage.Finished
+    }
+
+    func i(){
+        timedTransitions()
+        requireStage(Stage.Finished)
+    }
+
+}

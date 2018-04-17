@@ -1,0 +1,21 @@
+package sample asteroid.0.0.1
+
+contract Adder {
+
+    var x, y int
+
+    constructor(xa, ya int){
+        this.x, this.y = xa, ya
+    }
+
+    func add() int {
+        r = x + y
+        if r < x and r < y {
+            terminate("Addition has overflowed")
+        }
+    }
+
+    func terminate(err string){
+        io.Printf("%s", err)
+    }
+}

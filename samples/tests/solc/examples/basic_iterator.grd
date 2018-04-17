@@ -1,0 +1,32 @@
+package examples asteroid.0.0.1
+
+contract BasicIterator {
+
+    var creator address
+    var integers [10]uint8
+
+    constructor(){
+        creator = msg.sender
+        x = uint8(0)
+        for x < len(integers) {
+        	integers[x] = x
+        	x++
+        }
+    }
+
+    func getSum() uint {
+        sum = uint(0)
+        x = uint(0)
+        for x < len(integers) {
+            sum += integers[x]
+            x++
+        }
+    }
+
+    func kill(){
+        if msg.sender == creator {
+            selfDestruct(creator)
+        }
+    }
+
+}

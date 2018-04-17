@@ -1,0 +1,18 @@
+contract Greeter {
+
+    class Person {
+
+        public (
+
+            static (
+
+                func ClassName() string {
+                    return "PERSON"
+                }
+
+            )
+
+        )
+
+    }
+}

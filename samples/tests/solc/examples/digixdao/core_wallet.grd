@@ -1,0 +1,130 @@
+package digixdao asteroid.0.0.1
+
+contract CoreWallet {
+
+    // indexed modifier on event makes all params indexed
+    indexed event Withdraw(amount uint, recipient, sender address)
+    indexed event PaymentRequest(requestID uint)
+    indexed event Approve(requestID uint)
+    indexed event Decline(requestID uint)
+
+    enum RequestStatus { Pending, Declined, Approved }
+
+    class Request {
+        var status RequestStatus
+        var amount uint
+        var recipient address
+    }
+
+    var (
+        approved map[address]bool
+        managers map[address]bool
+
+        requests map[uint]Request
+        requestCount = uint(0)
+    )
+
+    // TODO: declaring things as var public ??
+    public var owner address
+
+    func isOwner(){
+        require(owner == msg.sender)
+    }
+
+    func ifApproved(){
+        require(approved[msg.sender])
+    }
+
+    func ifManager(){
+        require(managers[msg.sender])
+    }
+
+    func ifStatus(status RequestStatus, requestID uint){
+        require(status == requests[requestID].status)
+    }
+
+    constructor(){
+        approved[msg.sender] = true
+        managers[msg.sender] = true
+        owner = msg.sender
+    }
+
+    public func getBalance() uint {
+        return this.balance
+    }
+
+    func authorizeUser(user address) bool {
+        ifManager()
+        approved[user] = true
+        return true
+    }
+
+    func unauthorizeUser(user address) bool {
+        ifManager()
+        approved[user] = false
+        return true
+    }
+
+    func authorizeManager(user address) bool {
+        isOwner()
+        managers[user] = true
+        return true
+    }
+
+    func unauthorizeUser(user address) bool {
+        isOwner()
+        managers[user] = false
+        return true
+    }
+
+    func withdraw(recipient address, amount uint) bool {
+        ifManager()
+        var success bool
+        if transfer(recipient, amount) {
+            Withdraw(amount, recipient, msg.sender)
+            success = true
+        } else {
+            success = false
+        }
+        return success
+    }
+
+    func request(recipient address, amount uint) bool {
+        ifApproved()
+        var success bool
+        if amount < balanceOf(recipient) {
+            success = false
+        } else {
+            requestCount++
+            requests[requestCount].status = RequestStatus.Pending
+            requests[requestCount].amount = amount
+            requests[requestCount].recipient = recipient
+            success = true
+            PaymentRequest(requestCount)
+        }
+        return success
+    }
+
+    func approve(requestID uint) bool {
+        ifManager()
+        ifStatus(RequestStatus.Pending, requestID)
+        var success bool
+        r = requests[requestID]
+        if transfer(r.recipient, r.amount) {
+            success = true
+            Approve(requestID)
+        } else {
+            success = false
+        }
+        return success
+    }
+
+    func decline(requestID uint) bool {
+        ifManager()
+        ifStatus(RequestStatus.Pending, requestID)
+        requests[requestID].status = RequestStatus.Declined
+        Decline(requestID)
+        return true
+    }
+
+}

@@ -1,0 +1,29 @@
+contract C {
+
+    interface A {
+        doStuff()
+        doOtherStuff()
+    }
+
+    interface B inherits A {
+        doMoreStuff()
+    }
+
+    interface Full {
+        doEvenMoreStuff(string) string
+        wowALotOfStuff(map[string]int) map[string]int
+        iCantBelieveIveDoneThis([]string) map[string]int
+    }
+
+    interface Named {
+        doEvenMoreStuff(a string) string
+        wowALotOfStuff(b map[string]int) map[string]int
+        iCantBelieveIveDoneThis(c []string) map[string]int
+    }
+
+    interface NamedReturn {
+        doEvenMoreStuff(string) (a string)
+        wowALotOfStuff(map[string]int) map[string]int
+    }
+
+}
