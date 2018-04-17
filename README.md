@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/benchlab/GoAsteroid/raw/master/asteroid-lang-logo.png" width="300px" alt="Asteroid Logo"/>
+  <img src="https://github.com/benchlab/GoAsteroid/raw/master/asteroid-logo.png" width="300px" alt="Asteroid Logo"/>
 </p>
 
 # Asteroid 
