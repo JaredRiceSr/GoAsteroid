@@ -57,7 +57,7 @@ In order for future versions of Asteroid to include potentially backwards-incomp
 package orderbook asteroid 0.0.1
 ```
 
-## Importing packages with Asteroid
+## Importing Packages With Asteroid
 
 Asteroid packages may be imported using the following syntax:
 
