@@ -21,9 +21,8 @@ Asteroid is agnostic to the distributed virtual machines it runs on. This means 
 
 ## Asteroid Roadmap To Production
 
-In no particular order, Asteroid strives to:
-
-- Deterministic execution (85% Done)
+In no particular order, we are currently developing in the following areas:
+- Operate with deterministic execution (85% Done)
 - Balance legibility, security and the overall safety of using Asteroid in production. (35% Done)
 - Follow other OOP Languages with more features. (75% Done)
 - Easy to learn (90% Done)
