@@ -11,14 +11,6 @@ Asteroid is a statically typed, object-oriented programming language for smart c
 Asteroid is agnostic to the distributed virtual machines it runs on. This means the same code can be used on other distributed virtual machine-based smart contract systems on other blockchains.
 
 
-| Name | Development Status |
-|:-----------:|:----|
-| BenchVM | 82% Done |
-| EVM | 80% Done |
-| NEO BVM | Upcoming |
-
-
-
 ## Asteroid Roadmap To Production
 
 In no particular order, we are currently developing in the following areas:
